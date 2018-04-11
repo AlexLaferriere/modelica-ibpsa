@@ -3,13 +3,15 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
   parameter Integer p_max(min=1) = 5 "Number of cells per aggregation level";
   parameter Boolean forceGFunCalc = false
     "Set to true to force the thermal response to be calculated at the start";
-  replaceable parameter
-    IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.Records.BorefieldData
-    bfData constrainedby
-    IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.Records.BorefieldData
-    "Record containing all the parameters of the borefield model" annotation (
-     choicesAllMatching=true, Placement(transformation(extent={{-90,-88},{-70,
-            -68}})));
+
+  parameter Integer nbBh;
+  parameter Real[nbBh,2] cooBh;
+  parameter Real hBor;
+  parameter Real dBor;
+  parameter Real rBor;
+  parameter Real alp;
+  parameter Real k;
+  parameter Real tStep;
 
   Modelica.Blocks.Interfaces.RealInput Tg
     "Temperature input for undisturbed ground conditions"
@@ -23,31 +25,31 @@ protected
   parameter Integer nbTimLon = 50 "Number of time steps in long time region";
   parameter Real ttsMax = exp(5) "Maximum adimensional time for gfunc calculation";
   parameter String SHAgfun = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.ThermalResponseFactors.shaGFunction(
-    nbBor=bfData.gen.nbBh,
-    cooBor=bfData.gen.cooBh,
-    hBor=bfData.gen.hBor,
-    dBor=bfData.gen.dBor,
-    rBor=bfData.gen.rBor,
-    alpha=bfData.soi.alp) "String with encrypted g-function arguments";
+    nbBor=nbBh,
+    cooBor=cooBh,
+    hBor=hBor,
+    dBor=dBor,
+    rBor=rBor,
+    alpha=alp) "String with encrypted g-function arguments";
   parameter Integer nrow = nbTimSho+nbTimLon-1
     "Length of g-function matrix";
   parameter Real lvlBas = 2 "Base for exponential cell growth between levels";
   parameter Modelica.SIunits.Time timFin=
-    (bfData.gen.hBor^2/(9*bfData.soi.alp))*ttsMax;
+    (hBor^2/(9*alp))*ttsMax;
   parameter Integer i = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.countAggPts(
     lvlBas=lvlBas,
     p_max=p_max,
     timFin=timFin,
-    lenAggSte=bfData.gen.tStep) "Number of aggregation points";
+    lenAggSte=tStep) "Number of aggregation points";
   parameter Real timSer[nrow+1, 2]=
     IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.timSerMat(
-    nbBor=bfData.gen.nbBh,
-    cooBor=bfData.gen.cooBh,
-    hBor=bfData.gen.hBor,
-    dBor=bfData.gen.dBor,
-    rBor=bfData.gen.rBor,
-    as=bfData.soi.alp,
-    ks=bfData.soi.k,
+    nbBor=nbBh,
+    cooBor=cooBh,
+    hBor=hBor,
+    dBor=dBor,
+    rBor=rBor,
+    as=alp,
+    ks=k,
     nrow=nrow,
     sha=SHAgfun,
     forceGFunCalc=forceGFunCalc,
@@ -85,7 +87,7 @@ initial equation
     i=i,
     lvlBas=lvlBas,
     p_max=p_max,
-    lenAggSte=bfData.gen.tStep,
+    lenAggSte=tStep,
     timFin=timFin);
 
   t0 = time;
@@ -96,13 +98,13 @@ initial equation
     TStep=timSer,
     nu=nu);
 
-  dhdt = kappa[1]/bfData.gen.tStep;
+  dhdt = kappa[1]/tStep;
 
 equation
   der(deltaTb) = dhdt*Tb.Q_flow + derDelTbs;
   deltaTb = Tb.T-Tg;
 
-  when (sample(t0, bfData.gen.tStep)) then
+  when (sample(t0, tStep)) then
     (curCel,Q_shift) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.nextTimeStep(
       i=i,
       Q_i=pre(Q_i),
@@ -123,7 +125,7 @@ equation
 
     delTbOld = Tb.T-Tg;
 
-    derDelTbs = (delTbs-delTbOld)/bfData.gen.tStep;
+    derDelTbs = (delTbs-delTbOld)/tStep;
   end when;
 
   assert((time - t0) <= timFin,
