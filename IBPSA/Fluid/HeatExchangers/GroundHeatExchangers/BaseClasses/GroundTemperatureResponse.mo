@@ -20,8 +20,9 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
     "Heat port for resulting borehole wall conditions"
     annotation (Placement(transformation(extent={{90,-10},{110,10}})));
 
-protected
+//protected
   parameter Integer i_cst = 200;
+  Real[i_cst] U_i;
   parameter Integer nbTimSho = 26 "Number of time steps in short time region";
   parameter Integer nbTimLon = 50 "Number of time steps in long time region";
   parameter Real ttsMax = exp(5) "Maximum adimensional time for gfunc calculation";
@@ -78,7 +79,7 @@ protected
     "Time derivative of g/(2*pi*H*ks) within most recent cell";
 
 initial equation
-  Q_i = zeros(i_cst);
+  //Q_i = zeros(i_cst);
   //curCel = 1;
   //Q_shift = Q_i;
 
@@ -106,7 +107,7 @@ equation
   deltaTb = Tb.T-Tg;
   deltaTb = delTbs;
 
-  delTbs = time/(1000*tStep);
+  //delTbs = time/(1000*tStep);
 
 
     //(curCel,Q_shift) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.nextTimeStep(
@@ -123,12 +124,12 @@ equation
       //Qb=Tb.Q_flow,
       //Q_shift=Q_shift);
 
-    //delTbs = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
-      //i=i,
-      //i_cst=i_cst,
-      //Q_i=Q_i,
-      //kappa=kappa,
-      //curCel=i_cst);
+    delTbs = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
+      i=i,
+      i_cst=i_cst,
+      Q_i=Q_i,
+      kappa=kappa,
+      curCel=i_cst);
 
     //delTbOld = Tb.T-Tg;
 
@@ -136,13 +137,17 @@ equation
 
 
   for jj in 1:i_cst loop
+    der(U_i[jj]) = Q_i[jj];
+
     if jj==1 then
-      der(Q_i[jj]) = der(Tb.Q_flow);
-    elseif jj==i_cst then
-      der(Q_i[jj]) = 0;
+      der(U_i[jj]) = Tb.Q_flow;
+    //elseif jj==i_cst then
+      //der(Q_i[jj]) = 0;
     else
+      der(U_i[jj]) = (U_i[jj-1]-U_i[jj])/tStep;
       //der(Q_i[jj])/rCel[jj] = der(Q_i[jj-1])/rCel[jj-1];
-      der(Q_i[jj]) = (Q_i[jj]*rCel[jj]-Q_i[jj+1]*rCel[jj+1])/(tStep*rCel[jj]);
+      //der(Q_i[jj]) = (Q_i[jj]*rCel[jj]-Q_i[jj+1]*rCel[jj+1])/(tStep*rCel[jj]);
+      //Q_i[jj] = (U_i[jj-1]-U_i[jj])/tStep;
     end if;
   end for;
 
