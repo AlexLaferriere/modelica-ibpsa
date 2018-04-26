@@ -3,9 +3,10 @@ function tempSuperposition "Performs temporal superposition"
   extends Modelica.Icons.Function;
 
   input Integer i "Number of aggregation cells";
-  input Modelica.SIunits.HeatFlowRate Q_i[i]
+  input Integer i_cst;
+  input Modelica.SIunits.HeatFlowRate Q_i[i_cst]
     "Shifted Q_bar vector of size i";
-  input Modelica.SIunits.Temperature kappa[i]
+  input Modelica.SIunits.Temperature kappa[i_cst]
     "Weight factor for each aggregation cell";
   input Integer curCel "Current occupied aggregation cell";
 

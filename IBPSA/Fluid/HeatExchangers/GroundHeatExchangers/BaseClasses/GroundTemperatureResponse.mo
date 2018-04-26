@@ -1,11 +1,11 @@
 within IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses;
 model GroundTemperatureResponse "Model calculating discrete load aggregation"
   parameter Integer p_max(min=1) = 5 "Number of cells per aggregation level";
-  parameter Boolean forceGFunCalc = false
+  parameter Boolean forceGFunCalc = true
     "Set to true to force the thermal response to be calculated at the start";
 
-  parameter Integer nbBh;
-  parameter Real[nbBh,2] cooBh;
+  parameter Integer nbBh = 1;
+  parameter Real[nbBh,2] cooBh = [0,0];
   parameter Real hBor;
   parameter Real dBor;
   parameter Real rBor;
@@ -21,16 +21,17 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
     annotation (Placement(transformation(extent={{90,-10},{110,10}})));
 
 protected
+  parameter Integer i_cst = 200;
   parameter Integer nbTimSho = 26 "Number of time steps in short time region";
   parameter Integer nbTimLon = 50 "Number of time steps in long time region";
   parameter Real ttsMax = exp(5) "Maximum adimensional time for gfunc calculation";
-  parameter String SHAgfun = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.ThermalResponseFactors.shaGFunction(
-    nbBor=nbBh,
-    cooBor=cooBh,
-    hBor=hBor,
-    dBor=dBor,
-    rBor=rBor,
-    alpha=alp) "String with encrypted g-function arguments";
+//   parameter String SHAgfun = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.ThermalResponseFactors.shaGFunction(
+//     nbBor=nbBh,
+//     cooBor=cooBh,
+//     hBor=hBor,
+//     dBor=dBor,
+//     rBor=rBor,
+//     alpha=alp) "String with encrypted g-function arguments";
   parameter Integer nrow = nbTimSho+nbTimLon-1
     "Length of g-function matrix";
   parameter Real lvlBas = 2 "Base for exponential cell growth between levels";
@@ -51,7 +52,7 @@ protected
     as=alp,
     ks=k,
     nrow=nrow,
-    sha=SHAgfun,
+    sha="null",
     forceGFunCalc=forceGFunCalc,
     nbTimSho=nbTimSho,
     nbTimLon=nbTimLon,
@@ -59,32 +60,31 @@ protected
     "g-function input from mat, with the second column as temperature Tstep";
 
   final parameter Modelica.SIunits.Time t0(fixed=false) "Simulation start time";
-  final parameter Modelica.SIunits.Time[i] nu(fixed=false)
+  final parameter Modelica.SIunits.Time[i_cst] nu(fixed=false)
     "Time vector for load aggregation";
-  final parameter Real[i] kappa(fixed=false)
+  final parameter Real[i_cst] kappa(fixed=false)
     "Weight factor for each aggregation cell";
-  final parameter Real[i] rCel(fixed=false) "Cell widths";
-  Modelica.SIunits.HeatFlowRate[i] Q_i "Q_bar vector of size i";
-  Modelica.SIunits.HeatFlowRate[i] Q_shift
-    "Shifted Q_bar vector of size i";
-  Integer curCel "Current occupied cell";
+  final parameter Real[i_cst] rCel(fixed=false) "Cell widths";
+  Modelica.SIunits.HeatFlowRate[i_cst] Q_i "Q_bar vector of size i";
+  //Modelica.SIunits.HeatFlowRate[i_cst] Q_shift
+    //"Shifted Q_bar vector of size i";
+  //Integer curCel "Current occupied cell";
   Modelica.SIunits.TemperatureDifference deltaTb "Tb-Tg";
   Real delTbs "Wall temperature change from previous time steps";
-  Real derDelTbs
-    "Derivative of wall temperature change from previous time steps";
-  Real delTbOld "Tb-Tg at previous time step";
+  //Real derDelTbs
+    //"Derivative of wall temperature change from previous time steps";
+  //Real delTbOld "Tb-Tg at previous time step";
   final parameter Real dhdt(fixed=false)
     "Time derivative of g/(2*pi*H*ks) within most recent cell";
 
 initial equation
-  Q_i = zeros(i);
-  curCel = 1;
-  deltaTb = 0;
-  Q_shift = Q_i;
-  delTbs = 0;
+  Q_i = zeros(i_cst);
+  //curCel = 1;
+  //Q_shift = Q_i;
 
   (nu,rCel) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.timAgg(
     i=i,
+    i_cst=i_cst,
     lvlBas=lvlBas,
     p_max=p_max,
     lenAggSte=tStep,
@@ -94,6 +94,7 @@ initial equation
 
   kappa = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.kapAgg(
     i=i,
+    i_cst=i_cst,
     nrow=nrow,
     TStep=timSer,
     nu=nu);
@@ -101,36 +102,53 @@ initial equation
   dhdt = kappa[1]/tStep;
 
 equation
-  der(deltaTb) = dhdt*Tb.Q_flow + derDelTbs;
+  //der(deltaTb) = dhdt*Tb.Q_flow + derDelTbs;
   deltaTb = Tb.T-Tg;
+  deltaTb = delTbs;
 
-  when (sample(t0, tStep)) then
-    (curCel,Q_shift) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.nextTimeStep(
-      i=i,
-      Q_i=pre(Q_i),
-      rCel=rCel,
-      nu=nu,
-      curTim=(time - t0));
+  delTbs = time/(1000*tStep);
 
-    Q_i = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.setCurLoa(
-      i=i,
-      Qb=Tb.Q_flow,
-      Q_shift=Q_shift);
 
-    delTbs = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
-      i=i,
-      Q_i=Q_shift,
-      kappa=kappa,
-      curCel=curCel);
+    //(curCel,Q_shift) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.nextTimeStep(
+      //i=i,
+      //i_cst=i_cst,
+      //Q_i=zeros(i_cst),
+      //rCel=rCel,
+      //nu=nu,
+      //curTim=(time - t0));
 
-    delTbOld = Tb.T-Tg;
+    //Q_i = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.setCurLoa(
+      //i=i,
+      //i_cst=i_cst,
+      //Qb=Tb.Q_flow,
+      //Q_shift=Q_shift);
 
-    derDelTbs = (delTbs-delTbOld)/tStep;
-  end when;
+    //delTbs = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
+      //i=i,
+      //i_cst=i_cst,
+      //Q_i=Q_i,
+      //kappa=kappa,
+      //curCel=i_cst);
 
-  assert((time - t0) <= timFin,
-    "The simulation is too lengthy for the thermal response factor
-    calculations");
+    //delTbOld = Tb.T-Tg;
+
+    //derDelTbs = (delTbs-delTbOld)/tStep;
+
+
+  for jj in 1:i_cst loop
+    if jj==1 then
+      der(Q_i[jj]) = der(Tb.Q_flow);
+    elseif jj==i_cst then
+      der(Q_i[jj]) = 0;
+    else
+      //der(Q_i[jj])/rCel[jj] = der(Q_i[jj-1])/rCel[jj-1];
+      der(Q_i[jj]) = (Q_i[jj]*rCel[jj]-Q_i[jj+1]*rCel[jj+1])/(tStep*rCel[jj]);
+    end if;
+  end for;
+
+//   assert((time - t0) <= timFin,
+//     "The simulation is too lengthy for the thermal response factor
+//     calculations");
 
   annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
         Rectangle(

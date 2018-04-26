@@ -3,11 +3,12 @@ function setCurLoa "Sets the load for the current time step"
   extends Modelica.Icons.Function;
 
   input Integer i "Size of vector";
+  input Integer i_cst;
   input Real Qb "Load at current time step";
-  input Modelica.SIunits.HeatFlowRate Q_shift[i]
+  input Modelica.SIunits.HeatFlowRate Q_shift[i_cst]
     "Shifted Q_bar vector of size i";
 
-  output Modelica.SIunits.HeatFlowRate Q_shift_cur[i]
+  output Modelica.SIunits.HeatFlowRate Q_shift_cur[i_cst]
     "Shifted Q_bar vector of size i";
 
 algorithm

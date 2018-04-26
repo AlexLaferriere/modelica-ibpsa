@@ -4,16 +4,18 @@ function nextTimeStep
   extends Modelica.Icons.Function;
 
   input Integer i "Number of aggregation cells";
-  input Modelica.SIunits.HeatFlowRate Q_i[i] "Q_bar vector of size i";
-  input Real rCel[i] "Aggregation cell widths";
-  input Modelica.SIunits.Time nu[i] "Cell aggregation times";
+  input Integer i_cst;
+  input Modelica.SIunits.HeatFlowRate Q_i[i_cst] "Q_bar vector of size i";
+  input Real rCel[i_cst] "Aggregation cell widths";
+  input Modelica.SIunits.Time nu[i_cst] "Cell aggregation times";
   input Modelica.SIunits.Time curTim "Current simulation time";
 
   output Integer curCel "Current occupied aggregation cell";
-  output Modelica.SIunits.HeatFlowRate Q_i_shift[i] "Shifted Q_bar vector";
+  output Modelica.SIunits.HeatFlowRate Q_i_shift[i_cst] "Shifted Q_bar vector";
 
 algorithm
   curCel := 1;
+  Q_i_shift := zeros(i_cst);
   for j in (i-1):-1:1 loop
     if curTim>=nu[j+1] then
       Q_i_shift[j+1] :=((rCel[j+1] - 1)*Q_i[j+1] + Q_i[j])/rCel[j+1];
@@ -24,6 +26,8 @@ algorithm
   end for;
 
   Q_i_shift[1] := 0;
+
+
 
   annotation (Documentation(info="<html>
 <p>Performs the shifting operation which propagates the thermal load history

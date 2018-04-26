@@ -3,11 +3,12 @@ function kapAgg "Calculates the kappa vector for load aggregation"
   extends Modelica.Icons.Function;
 
   input Integer i "Size of vector";
+  input Integer i_cst;
   input Integer nrow "Number of rows in input file";
   input Real TStep[nrow+1,2] "Time matrix with TStep";
-  input Modelica.SIunits.Time nu[i] "Aggregation time vector nu";
+  input Modelica.SIunits.Time nu[i_cst] "Aggregation time vector nu";
 
-  output Real kappa[i] "Vector kappa of size i";
+  output Real kappa[i_cst] "Vector kappa of size i";
 
 protected
   Real prevT, curT;
@@ -17,6 +18,7 @@ protected
 algorithm
   d := IBPSA.Utilities.Math.Functions.splineDerivatives(x=TStep[:,1], y=TStep[:,2], ensureMonotonicity=false);
 
+  kappa := zeros(i_cst);
   for j in 1:i loop
     if j==1 then
       prevT := 0;

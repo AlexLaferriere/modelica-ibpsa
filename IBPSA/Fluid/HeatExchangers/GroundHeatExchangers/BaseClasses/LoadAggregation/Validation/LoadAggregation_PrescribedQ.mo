@@ -5,19 +5,15 @@ model LoadAggregation_PrescribedQ
 
   GroundTemperatureResponse groTem(
     p_max=5,
-    bfData(
-      redeclare record Soi =
-          IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.SoilData.SandStone
-          (
-          k=1,
-          c=1,
-          d=1e6),
-      redeclare record Fil =
-          IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.FillingData.Bentonite,
-      redeclare record Gen =
-          IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.Records.General
-          (hBor=100, rBor=0.05)),
-    forceGFunCalc=true)
+    forceGFunCalc=true,
+    nbBh=1,
+    cooBh=[0,0],
+    hBor=100,
+    dBor=4,
+    rBor=0.05,
+    alp=1e-6,
+    k=1,
+    tStep=3600)
     "Load Aggregation in borehole"
     annotation (Placement(transformation(extent={{-20,0},{0,20}})));
 
@@ -55,6 +51,8 @@ model LoadAggregation_PrescribedQ
 
   Modelica.Blocks.Sources.Constant const(k=273.15)
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+  Modelica.Blocks.Sources.Constant const1(k=100)
+    annotation (Placement(transformation(extent={{20,40},{40,60}})));
 equation
   connect(prescribedHeatFlow.port, groTem.Tb)
     annotation (Line(points={{20,10},{0,10}}, color={191,0,0}));
@@ -62,13 +60,13 @@ equation
           {10,-30},{10,10},{0,10}}, color={191,0,0}));
   connect(temperatureSensor.T, add.u2)
     annotation (Line(points={{40,-30},{44,-30},{44,-58}}, color={0,0,127}));
-  connect(timTabQ.y[1], prescribedHeatFlow.Q_flow)
-    annotation (Line(points={{59,10},{40,10}}, color={0,0,127}));
   connect(timTabT.y[1], add.u1)
     annotation (Line(points={{59,-30},{56,-30},{56,-58}}, color={0,0,127}));
   connect(groTem.Tg, const.y)
     annotation (Line(points={{-22,10},{-39,10}}, color={0,0,127}));
 
+  connect(const1.y, prescribedHeatFlow.Q_flow) annotation (Line(points={{41,50},
+          {50,50},{50,10},{40,10}}, color={0,0,127}));
   annotation (experiment(StopTime=630720000),
     Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),

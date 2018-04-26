@@ -4,19 +4,22 @@ function timAgg
   extends Modelica.Icons.Function;
 
   input Integer i "Size of time vector";
+  input Integer i_cst;
   input Real lvlBas "Base for growth between each level, e.g. 2";
   input Integer p_max "Number of cells of same size per level";
   input Modelica.SIunits.Time lenAggSte "Aggregation step";
   input Modelica.SIunits.Time timFin "Total simulation max length";
 
-  output Modelica.SIunits.Time nu[i] "Time vector nu of size i";
-  output Real rCel[i] "Cell width vector of size i";
+  output Modelica.SIunits.Time nu[i_cst] "Time vector nu of size i";
+  output Real rCel[i_cst] "Cell width vector of size i";
 
 protected
   Real width_j;
 
 algorithm
   width_j := 0;
+  nu := zeros(i_cst);
+  rCel := ones(i_cst);
 
   for j in 1:i loop
     width_j := width_j + lenAggSte*lvlBas^floor((j-1)/p_max);

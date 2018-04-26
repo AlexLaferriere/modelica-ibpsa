@@ -30,10 +30,10 @@ protected
 
 algorithm
   //creation of a folder .BfData in the simulation folder
-  Modelica.Utilities.Files.createDirectory(".BfData");
-  pathSave := ".BfData/" + sha + "Tstep.mat";
+  //Modelica.Utilities.Files.createDirectory(".BfData");
+  //pathSave := ".BfData/" + sha + "Tstep.mat";
 
-  if forceGFunCalc or not Modelica.Utilities.Files.exist(pathSave) then
+
     ts := hBor^2/(9*as);
 
     (lntts,gFun) :=
@@ -55,18 +55,18 @@ algorithm
       matrix[i+1,2] := gFun[i]/(2*Modelica.Constants.pi*hBor*nbBor*ks);
     end for;
 
-    writegFun := writeMatrix(
-      fileName=pathSave,
-      matrixName="TStep",
-      matrix=matrix,
-      append=false);
-  end if;
+//     writegFun := writeMatrix(
+//       fileName=pathSave,
+//       matrixName="TStep",
+//       matrix=matrix,
+//       append=false);
 
-  matrix := readMatrix(
-    fileName=pathSave,
-    matrixName="TStep",
-    rows=nrow+1,
-    columns=2);
+
+//   matrix := readMatrix(
+//     fileName=pathSave,
+//     matrixName="TStep",
+//     rows=nrow+1,
+//     columns=2);
 
   annotation (Documentation(info="<html>
 <p>
