@@ -65,9 +65,9 @@ equation
   connect(groTem.Tg, const.y)
     annotation (Line(points={{-22,10},{-39,10}}, color={0,0,127}));
 
-  connect(const1.y, prescribedHeatFlow.Q_flow) annotation (Line(points={{41,50},
-          {50,50},{50,10},{40,10}}, color={0,0,127}));
-  annotation (experiment(StopTime=630720000),
+  connect(timTabQ.y[1], prescribedHeatFlow.Q_flow)
+    annotation (Line(points={{59,10},{40,10},{40,10}}, color={0,0,127}));
+  annotation (experiment(StopTime=10800,OutputInterval=3600),
     Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),
 __Dymola_Commands(file="modelica://IBPSA/Resources/Scripts/Dymola/Fluid/HeatExchangers/GroundHeatExchangers/BaseClasses/LoadAggregation/Validation/LoadAggregation_PrescribedQ.mos"
