@@ -13,7 +13,7 @@ function tempSuperposition "Performs temporal superposition"
   output Modelica.SIunits.TemperatureDifference deltaTb "Delta T at wall";
 
 algorithm
-  deltaTb := (Q_i[2:curCel]*kappa[2:curCel]);
+  deltaTb := (Q_i[1:curCel]*kappa[1:curCel]);
 
   annotation (Documentation(info="<html>
 <p>

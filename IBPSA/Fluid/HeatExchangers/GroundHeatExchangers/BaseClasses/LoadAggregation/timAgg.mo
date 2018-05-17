@@ -33,6 +33,12 @@ algorithm
     rCel[i] := (nu[i]-nu[i-1])/lenAggSte;
   end if;
 
+  if i_cst>i then
+    for jj in (i+1):i_cst loop
+      nu[jj] := 10000*8760*3600;
+    end for;
+  end if;
+
   annotation (Documentation(info="<html>
 <p>Simultaneously constructs both the <code>nu</code> vector, which is the
 aggregation time of each cell, and the <code>rcel</code> vector, which

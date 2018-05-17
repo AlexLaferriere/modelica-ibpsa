@@ -51,8 +51,6 @@ model LoadAggregation_PrescribedQ
 
   Modelica.Blocks.Sources.Constant const(k=273.15)
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-  Modelica.Blocks.Sources.Constant const1(k=100)
-    annotation (Placement(transformation(extent={{20,40},{40,60}})));
 equation
   connect(prescribedHeatFlow.port, groTem.Tb)
     annotation (Line(points={{20,10},{0,10}}, color={191,0,0}));
@@ -66,7 +64,7 @@ equation
     annotation (Line(points={{-22,10},{-39,10}}, color={0,0,127}));
 
   connect(timTabQ.y[1], prescribedHeatFlow.Q_flow)
-    annotation (Line(points={{59,10},{40,10},{40,10}}, color={0,0,127}));
+    annotation (Line(points={{59,10},{40,10}},         color={0,0,127}));
   annotation (experiment(StopTime=10800,OutputInterval=3600),
     Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)),

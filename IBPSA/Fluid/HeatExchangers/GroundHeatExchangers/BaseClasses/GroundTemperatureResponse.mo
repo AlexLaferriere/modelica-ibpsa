@@ -22,17 +22,9 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
 
 //protected
   parameter Integer i_cst = 200;
-  Real[i_cst] U_i;
   parameter Integer nbTimSho = 26 "Number of time steps in short time region";
   parameter Integer nbTimLon = 50 "Number of time steps in long time region";
   parameter Real ttsMax = exp(5) "Maximum adimensional time for gfunc calculation";
-//   parameter String SHAgfun = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.ThermalResponseFactors.shaGFunction(
-//     nbBor=nbBh,
-//     cooBor=cooBh,
-//     hBor=hBor,
-//     dBor=dBor,
-//     rBor=rBor,
-//     alpha=alp) "String with encrypted g-function arguments";
   parameter Integer nrow = nbTimSho+nbTimLon-1
     "Length of g-function matrix";
   parameter Real lvlBas = 2 "Base for exponential cell growth between levels";
@@ -60,7 +52,6 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
     ttsMax=ttsMax)
     "g-function input from mat, with the second column as temperature Tstep";
 
-  final parameter Modelica.SIunits.Time t0(fixed=false) "Simulation start time";
   final parameter Modelica.SIunits.Time[i_cst] nu(fixed=false)
     "Time vector for load aggregation";
   final parameter Real[i_cst] kappa(fixed=false)
@@ -71,12 +62,6 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
     //"Shifted Q_bar vector of size i";
   //Integer curCel "Current occupied cell";
   Modelica.SIunits.TemperatureDifference deltaTb "Tb-Tg";
-  Real delTbs "Wall temperature change from previous time steps";
-  //Real derDelTbs
-    //"Derivative of wall temperature change from previous time steps";
-  //Real delTbOld "Tb-Tg at previous time step";
-  final parameter Real dhdt(fixed=false)
-    "Time derivative of g/(2*pi*H*ks) within most recent cell";
 
 initial equation
   //Q_i = zeros(i_cst);
@@ -91,8 +76,6 @@ initial equation
     lenAggSte=tStep,
     timFin=timFin);
 
-  t0 = time;
-
   kappa = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.kapAgg(
     i=i,
     i_cst=i_cst,
@@ -100,60 +83,24 @@ initial equation
     TStep=timSer,
     nu=nu);
 
-  dhdt = kappa[1]/tStep;
-
 equation
-  //der(deltaTb) = dhdt*Tb.Q_flow + derDelTbs;
   deltaTb = Tb.T-Tg;
-  deltaTb = delTbs;
 
-  //delTbs = time/(1000*tStep);
-
-
-    //(curCel,Q_shift) = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.nextTimeStep(
-      //i=i,
-      //i_cst=i_cst,
-      //Q_i=zeros(i_cst),
-      //rCel=rCel,
-      //nu=nu,
-      //curTim=(time - t0));
-
-    //Q_i = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.setCurLoa(
-      //i=i,
-      //i_cst=i_cst,
-      //Qb=Tb.Q_flow,
-      //Q_shift=Q_shift);
-
-    delTbs = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
-      i=i,
-      i_cst=i_cst,
-      Q_i=Q_i,
-      kappa=kappa,
-      curCel=i_cst);
-
-    //delTbOld = Tb.T-Tg;
-
-    //derDelTbs = (delTbs-delTbOld)/tStep;
-
+  //Temporal superposition
+  deltaTb = IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.BaseClasses.LoadAggregation.tempSuperposition(
+    i=i,
+    i_cst=i_cst,
+    Q_i=Q_i,
+    kappa=kappa,
+    curCel=i_cst);
 
   for jj in 1:i_cst loop
-    der(U_i[jj]) = Q_i[jj];
-
     if jj==1 then
-      der(U_i[jj]) = Tb.Q_flow;
-    //elseif jj==i_cst then
-      //der(Q_i[jj]) = 0;
+      der(Q_i[jj]) = (Tb.Q_flow-Q_i[jj])/(rCel[jj]*tStep);
     else
-      der(U_i[jj]) = (U_i[jj-1]-U_i[jj])/tStep;
-      //der(Q_i[jj])/rCel[jj] = der(Q_i[jj-1])/rCel[jj-1];
-      //der(Q_i[jj]) = (Q_i[jj]*rCel[jj]-Q_i[jj+1]*rCel[jj+1])/(tStep*rCel[jj]);
-      //Q_i[jj] = (U_i[jj-1]-U_i[jj])/tStep;
+      der(Q_i[jj]) = if time>=nu[jj] then (Q_i[jj-1]-Q_i[jj])/(rCel[jj]*tStep) elseif time>=nu[jj-1] then Q_i[jj-1]/(rCel[jj]*tStep) else 0;
     end if;
   end for;
-
-//   assert((time - t0) <= timFin,
-//     "The simulation is too lengthy for the thermal response factor
-//     calculations");
 
   annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
         Rectangle(
