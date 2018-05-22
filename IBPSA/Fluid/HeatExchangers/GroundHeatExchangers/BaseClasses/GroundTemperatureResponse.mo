@@ -64,7 +64,7 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
   Modelica.SIunits.TemperatureDifference deltaTb "Tb-Tg";
 
 initial equation
-  //Q_i = zeros(i_cst);
+  Q_i = zeros(i_cst);
   //curCel = 1;
   //Q_shift = Q_i;
 
@@ -96,7 +96,7 @@ equation
 
   for jj in 1:i_cst loop
     if jj==1 then
-      der(Q_i[jj]) = (Tb.Q_flow-Q_i[jj])/(rCel[jj]*tStep);
+      der(Q_i[jj]) = if time>=nu[jj] then (Tb.Q_flow-Q_i[jj])/(rCel[jj]*tStep) else Tb.Q_flow/(rCel[jj]*tStep);
     else
       der(Q_i[jj]) = if time>=nu[jj] then (Q_i[jj-1]-Q_i[jj])/(rCel[jj]*tStep) elseif time>=nu[jj-1] then Q_i[jj-1]/(rCel[jj]*tStep) else 0;
     end if;
