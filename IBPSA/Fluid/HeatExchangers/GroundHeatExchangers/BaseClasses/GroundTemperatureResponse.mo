@@ -62,9 +62,12 @@ model GroundTemperatureResponse "Model calculating discrete load aggregation"
     //"Shifted Q_bar vector of size i";
   //Integer curCel "Current occupied cell";
   Modelica.SIunits.TemperatureDifference deltaTb "Tb-Tg";
+  Real Q1_1, Q1_2;
 
 initial equation
   Q_i = zeros(i_cst);
+  Q1_1=0;
+  Q1_2=0;
   //curCel = 1;
   //Q_shift = Q_i;
 
@@ -94,9 +97,13 @@ equation
     kappa=kappa,
     curCel=i_cst);
 
+    der(Q1_1) = if time>=(nu[1]/2) then (Tb.Q_flow-Q1_1)/((rCel[1]/2)*tStep) else Tb.Q_flow/((rCel[1]/2)*tStep);
+    der(Q1_2) = if time>=nu[1] then (Q1_1-Q1_2)/((rCel[1]/2)*tStep) elseif time>=(nu[1]/2) then Q1_1/((rCel[1]/2)*tStep) else 0;
+
   for jj in 1:i_cst loop
     if jj==1 then
-      der(Q_i[jj]) = if time>=nu[jj] then (Tb.Q_flow-Q_i[jj])/(rCel[jj]*tStep) else Tb.Q_flow/(rCel[jj]*tStep);
+      der(Q_i[jj]) = if time<=nu[jj] then (der(Q1_1)+der(Q1_2))/2 else der(Q1_1);
+      //der(Q_i[jj]) = if time>=nu[jj] then (Tb.Q_flow-Q_i[jj])/(rCel[jj]*tStep) else Tb.Q_flow/(rCel[jj]*tStep);
     else
       der(Q_i[jj]) = if time>=nu[jj] then (Q_i[jj-1]-Q_i[jj])/(rCel[jj]*tStep) elseif time>=nu[jj-1] then Q_i[jj-1]/(rCel[jj]*tStep) else 0;
     end if;
