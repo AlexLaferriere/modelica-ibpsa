@@ -18,7 +18,6 @@ model GFUNCT_CALC
         k=3.2),
     filDat=
         IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.FillingData.SandBox_validation(),
-
     conDat=
         IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.ConfigurationData.SandBox_validation(
         T_start=273.15,
@@ -27,6 +26,7 @@ model GFUNCT_CALC
         rBor=0.05,
         dBor=4))                                  "Borefield parameters"
     annotation (Placement(transformation(extent={{-100,-100},{-80,-80}})));
+
   Modelica.Thermal.HeatTransfer.Components.ThermalCollector therCol1(m=
         borFieDat.conDat.nVer) "Thermal collector" annotation (Placement(
         transformation(
@@ -51,10 +51,6 @@ model GFUNCT_CALC
   Modelica.Blocks.Sources.RealExpression Tfluid(y=((TBorAnaIn.T + TBorAnaOut.T)
         /2) - 273.15)
            annotation (Placement(transformation(extent={{-20,-80},{0,-60}})));
-  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow prescribedHeatFlow
-    annotation (Placement(transformation(extent={{60,40},{40,60}})));
-  Modelica.Blocks.Sources.RealExpression hhhhhh(y=0)
-    annotation (Placement(transformation(extent={{40,72},{60,92}})));
   IBPSA.Fluid.HeatExchangers.HeaterCooler_u hea(
     redeclare package Medium = Medium,
     m_flow_nominal=borFieDat.conDat.m_flow_nominal_bh,
@@ -94,10 +90,6 @@ equation
     annotation (Line(points={{20,10},{30,10},{40,10}}, color={0,127,255}));
   connect(borehole.port_a, TBorAnaIn.port_b)
     annotation (Line(points={{0,10},{-6,10},{-10,10}}, color={0,127,255}));
-  connect(groTemRes.Tb, prescribedHeatFlow.port) annotation (Line(points={{-40,
-          50},{-28,50},{-28,72},{30,72},{30,50},{40,50}}, color={191,0,0}));
-  connect(hhhhhh.y, prescribedHeatFlow.Q_flow) annotation (Line(points={{61,82},
-          {70,82},{70,50},{60,50}}, color={0,0,127}));
   connect(hea.port_b, TBorAnaIn.port_a)
     annotation (Line(points={{-40,10},{-35,10},{-30,10}}, color={0,127,255}));
   connect(TBorAnaOut.port_b, fan.port_a) annotation (Line(points={{60,10},{70,
