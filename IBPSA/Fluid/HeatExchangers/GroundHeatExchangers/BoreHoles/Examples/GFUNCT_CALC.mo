@@ -1,8 +1,9 @@
 within IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Boreholes.Examples;
 model GFUNCT_CALC
-  import IBPSA;
+  //import IBPSA;
   package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater;
 
+protected
   IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Boreholes.BoreholeOneUTube
     borehole(
     redeclare package Medium = Medium,
@@ -12,6 +13,8 @@ model GFUNCT_CALC
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
     T_start=273.15)
              annotation (Placement(transformation(extent={{0,0},{20,20}})));
+
+public
   parameter IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.BorefieldData.SandBox_validation
                                         borFieDat(soiDat=
         IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.SoilData.SandBox_validation(
@@ -22,7 +25,8 @@ model GFUNCT_CALC
         IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.ConfigurationData.SandBox_validation(
         T_start=273.15,
         m_flow_nominal_bh=0.5,
-        hBor=50,
+        dp_nominal=50,
+        hBor=100,
         rBor=0.05,
         dBor=4))                                  "Borefield parameters"
     annotation (Placement(transformation(extent={{-100,-100},{-80,-80}})));
@@ -33,10 +37,13 @@ model GFUNCT_CALC
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={-10,50})));
+
+protected
   IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.GroundHeatTransfer.GroundTemperatureResponse
     groTemRes(         borFieDat=borFieDat, tLoaAgg=300)
                                             "Ground temperature response"
     annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
+public
   Modelica.Blocks.Sources.Constant const(k=273.15)
     "Cosntant ground temperature"
     annotation (Placement(transformation(extent={{-100,70},{-80,90}})));
@@ -51,6 +58,7 @@ model GFUNCT_CALC
   Modelica.Blocks.Sources.RealExpression Tfluid(y=((TBorAnaIn.T + TBorAnaOut.T)
         /2) - 273.15)
            annotation (Placement(transformation(extent={{-20,-80},{0,-60}})));
+protected
   IBPSA.Fluid.HeatExchangers.HeaterCooler_u hea(
     redeclare package Medium = Medium,
     m_flow_nominal=borFieDat.conDat.m_flow_nominal_bh,
@@ -59,6 +67,7 @@ model GFUNCT_CALC
     T_start=273.15,
     Q_flow_nominal=1)
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+public
   IBPSA.Fluid.Sources.Boundary_pT sin1(
     redeclare package Medium = Medium,
     use_p_in=false,
@@ -79,6 +88,9 @@ model GFUNCT_CALC
   Modelica.Blocks.Sources.RealExpression heatin(y=2*Modelica.Constants.pi*
         borFieDat.soiDat.k*borFieDat.conDat.hBor)
     annotation (Placement(transformation(extent={{-100,30},{-80,50}})));
+  Modelica.Blocks.Sources.RealExpression logtime(y=if time >= 300 then
+        Modelica.Math.log(time/((100^2)/(9*1e-6))) else -15.13)
+           annotation (Placement(transformation(extent={{-20,-60},{0,-40}})));
 equation
   connect(therCol1.port_a, borehole.port_wall)
     annotation (Line(points={{0,50},{4,50},{10,50},{10,20}}, color={191,0,0}));

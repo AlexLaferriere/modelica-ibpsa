@@ -29,7 +29,9 @@ package Validation
       T_start=borFieDat.conDat.T_start)
       "Outlet temperature of the borefield"
       annotation (Placement(transformation(extent={{40,-70},{60,-50}})));
-    Data.BorefieldData.SandBox_validation borFieDat "Borefield data"
+    Data.BorefieldData.SandBox_validation borFieDat(conDat=
+          IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Data.ConfigurationData.SandBox_validation(
+          use_Rb=true, Rb=0.165))                   "Borefield data"
       annotation (Placement(transformation(extent={{-100,-100},{-80,-80}})));
     IBPSA.Fluid.Sources.Boundary_ph sin(redeclare package Medium =
           Medium, nPorts=1) "Sink"
