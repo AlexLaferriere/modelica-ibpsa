@@ -1,5 +1,7 @@
 within IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.Boreholes.Examples;
 model GFUNCT_CALC
+  extends Modelica.Icons.Example;
+
   //import IBPSA;
   package Medium = Modelica.Media.Water.ConstantPropertyLiquidWater;
 
