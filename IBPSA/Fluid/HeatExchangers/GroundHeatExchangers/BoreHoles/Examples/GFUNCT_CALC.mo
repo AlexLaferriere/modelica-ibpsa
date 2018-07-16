@@ -97,7 +97,7 @@ public
     fileName=
         "//apollon.meca.polymtl.ca/usagers/allafg/profiles/Desktop/validation_gfunct.txt",
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    timeScale(displayUnit="h") = 3600)
+    timeScale(displayUnit="s") = 300)
     annotation (Placement(transformation(extent={{-92,-60},{-72,-40}})));
 
 equation
@@ -121,8 +121,8 @@ equation
     annotation (Line(points={{-60,10},{-60,10},{-80,10}}, color={0,127,255}));
   connect(const2.y, fan.m_flow_in) annotation (Line(points={{59,-50},{54,-50},{
           50,-50},{50,-10},{30,-10},{30,-18}}, color={0,0,127}));
-  connect(heatin.y, hea.u) annotation (Line(points={{-79,40},{-68,40},{-68,16},
-          {-62,16}}, color={0,0,127}));
+  connect(combiTimeTable.y[1], hea.u) annotation (Line(points={{-71,-50},{-66,
+          -50},{-66,16},{-62,16}}, color={0,0,127}));
   annotation (experiment(stopTime=615600),Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end GFUNCT_CALC;
