@@ -60,7 +60,7 @@ public
   Modelica.Blocks.Sources.RealExpression Tfluid(y=((TBorAnaIn.T + TBorAnaOut.T)
         /2))
            annotation (Placement(transformation(extent={{-20,-80},{0,-60}})));
-protected
+//protected
   IBPSA.Fluid.HeatExchangers.HeaterCooler_u hea(
     redeclare package Medium = Medium,
     m_flow_nominal=borFieDat.conDat.m_flow_nominal_bh,
@@ -93,12 +93,12 @@ public
     annotation (Placement(transformation(extent={{-100,30},{-80,50}})));
   Modelica.Blocks.Sources.CombiTimeTable combiTimeTable(
     tableOnFile=true,
-    tableName="tab1",
     fileName=
         "//apollon.meca.polymtl.ca/usagers/allafg/profiles/Desktop/validation_gfunct.txt",
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
+    tableName="tab2",
     timeScale(displayUnit="s") = 300)
-    annotation (Placement(transformation(extent={{-92,-60},{-72,-40}})));
+    annotation (Placement(transformation(extent={{-96,-60},{-76,-40}})));
 
 equation
   connect(therCol1.port_a, borehole.port_wall)
@@ -121,8 +121,8 @@ equation
     annotation (Line(points={{-60,10},{-60,10},{-80,10}}, color={0,127,255}));
   connect(const2.y, fan.m_flow_in) annotation (Line(points={{59,-50},{54,-50},{
           50,-50},{50,-10},{30,-10},{30,-18}}, color={0,0,127}));
-  connect(combiTimeTable.y[1], hea.u) annotation (Line(points={{-71,-50},{-66,
-          -50},{-66,16},{-62,16}}, color={0,0,127}));
-  annotation (experiment(stopTime=615600),Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+  connect(combiTimeTable.y[1], hea.u) annotation (Line(points={{-75,-50},{-68,
+          -50},{-68,16},{-62,16}}, color={0,0,127}));
+  annotation (experiment(stopTime=51300, numberOfIntervals=0, outputInterval=300),Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
         coordinateSystem(preserveAspectRatio=false)));
 end GFUNCT_CALC;
