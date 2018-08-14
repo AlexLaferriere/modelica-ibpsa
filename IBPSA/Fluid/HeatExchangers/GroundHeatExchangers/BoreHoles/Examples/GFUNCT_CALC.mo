@@ -42,8 +42,9 @@ public
 
 protected
   IBPSA.Fluid.HeatExchangers.GroundHeatExchangers.GroundHeatTransfer.GroundTemperatureResponse
-    groTemRes(         borFieDat=borFieDat, tLoaAgg=300,
-    forceGFunCalc=true)                     "Ground temperature response"
+    groTemRes(         borFieDat=borFieDat,
+    forceGFunCalc=true,
+    tLoaAgg=1800)                           "Ground temperature response"
     annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
 public
   Modelica.Blocks.Sources.Constant const(k=283.15)
@@ -96,8 +97,9 @@ public
     fileName=
         "//apollon.meca.polymtl.ca/usagers/allafg/profiles/Desktop/validation_gfunct.txt",
     smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-    tableName="tab2",
-    timeScale(displayUnit="s") = 300)
+    tableName="tab1",
+    extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint,
+    timeScale(displayUnit="s") = 1800)
     annotation (Placement(transformation(extent={{-96,-60},{-76,-40}})));
 
 equation
